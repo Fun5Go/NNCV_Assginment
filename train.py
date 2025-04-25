@@ -87,6 +87,20 @@ def compute_dice_per_class(pred: np.ndarray, target: np.ndarray, num_classes: in
             dices.append(2.0 * intersection / denom)
     return np.nanmean(dices)
 
+def combined_loss(outputs, labels, ce_weight=0.7, dice_weight=0.3):
+    labels = labels.clone()
+    labels[labels == 255] = 0  # prevent one_hot from crashing on ignore_index
+    ce = nn.CrossEntropyLoss(ignore_index=255)(outputs, labels)
+    pred = torch.softmax(outputs, dim=1)
+    labels_onehot = torch.nn.functional.one_hot(labels, num_classes=19).permute(0, 3, 1, 2).float()
+    labels_onehot = labels_onehot.to(pred.device)
+    dims = (0, 2, 3)
+    intersection = torch.sum(pred * labels_onehot, dims)
+    union = torch.sum(pred + labels_onehot, dims)
+    dice = (2 * intersection + 1e-6) / (union + 1e-6)
+    dice_loss = 1 - dice.mean()
+    return ce_weight * ce + dice_weight * dice_loss
+
 # --- Argument Parser ---
 
 def get_args_parser():
@@ -165,7 +179,8 @@ def main(args):
             optimizer.zero_grad()
             with autocast():
                 outputs = model(images)
-                loss = criterion(outputs, labels)
+                #loss = criterion(outputs, labels)
+                loss = combined_loss(outputs, labels, ce_weight=0.5, dice_weight=0.5)
 
             scaler.scale(loss).backward()
             scaler.step(optimizer)
@@ -190,7 +205,8 @@ def main(args):
                 labels = labels.long().squeeze(1)
 
                 outputs = model(images)
-                loss = criterion(outputs, labels)
+                #loss = criterion(outputs, labels)
+                loss = combined_loss(outputs, labels, ce_weight=0.5, dice_weight=0.5)
                 losses.append(loss.item())
 
                 preds = outputs.softmax(1).argmax(1)

@@ -1,10 +1,10 @@
-## Required libraries and installation instructions.
-# Step 1: Download the Prerequisites
+# Required libraries and installation instructions.
+Step 1: Download the Prerequisites
 ```bash
 chmod +x download_docker_and_data.sh
 sbatch download_docker_and_data.sh
 ```
-# Step 2: Install other libraries 
+Step 2: Install other libraries 
 ```bash
 pip install requirements.txt
 ```
@@ -15,7 +15,8 @@ pip install requirements.txt
 python3 train.py \ ...
                     ...
 ```
-# WandB
+
+## WandB
 Just like the NNCV instruction.
 1. Open the `.env` file using a text editor:
 
@@ -38,7 +39,7 @@ Just like the NNCV instruction.
    ```
    then paste your API key (can be found in WandB personal profile)
 
-## Steps to run the code
+# Steps to run the code
 - If you are using the HPC to run the codes, also like the steps mentioned in the NNCV instruction:
 
 Submit the job with the following command:
@@ -59,6 +60,6 @@ python3 train.py \
     --experiment-id "FinalModel_Fan" \
 ```
 
-##  Codalab username and TU/e email address
+#  Codalab username and TU/e email address
 - Username: GoFun5
 - Tu/e email: f.wu@student.tue.nl
